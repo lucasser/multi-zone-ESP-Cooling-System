@@ -5,12 +5,16 @@
 #include <ESPAsyncWebServer.h>
 #include "SPIFFS.h"
 #include <Arduino_JSON.h>
+#include <ESP32Servo.h>
 
-// Replace with your network credentials
-const char* ssid = "leonwifi-8";
-const char* password = "leon1546";
+Servo servob1;
+Servo servob2;
+Servo servol;
 
 JSONVar values;
+
+String ssids;
+String passwords;
 
 const int LIVING = 4;
 const int BED1 = 27;
@@ -19,20 +23,44 @@ const int SPEED1 = 19;
 const int SPEED2 = 21;
 const int SPEED3 = 22;
 const int ZoneValve = 23;
+const int SERVOB1 = 14;
+const int SERVOB2 = 12;
+const int SERVOL = 13 ;
 
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
 
 AsyncEventSource events("/events");
 
+using namespace std;
+
 void initSPIFFS() {
   if (!SPIFFS.begin()) {
     Serial.println("An error has occurred while mounting SPIFFS");
   }
   Serial.println("SPIFFS mounted successfully");
+  File file = SPIFFS.open("/wifi.txt");
+  if (!file) {
+    Serial.println("Failed to open file for reading");
+    return;
+  }
+
+  vector<String> v;
+  while (file.available()) {
+    v.push_back(file.readStringUntil('\n'));
+  }
+  file.close();
+
+  for (String s : v) {
+
+  }
+  ssids = v[0];
+  passwords = v[1];
 }
 
 void initWiFi() {
+  const char* ssid = ssids.c_str();
+  const char* password = passwords.c_str();
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     digitalWrite(LED_BUILTIN, HIGH);
@@ -56,6 +84,10 @@ void initPins() {
   pinMode(SPEED2, OUTPUT);
   pinMode(SPEED3, OUTPUT);
   pinMode(ZoneValve, OUTPUT);
+
+  servob1.attach(SERVOB1);
+  servob2.attach(SERVOB2);
+  servol.attach(SERVOL);
 }
 
 int getSpeed() {
@@ -64,25 +96,31 @@ int getSpeed() {
     case HIGH:
       speed += 1;
       values["bed1"] = "on";
+      servob1.write(90);
       break;
     case LOW:
       values["bed1"] = "off";
+      servob1.write(0);
   }
   switch (digitalRead(BED2)) {
     case HIGH:
       speed += 1;
       values["bed2"] = "on";
+      servob2.write(90);
       break;
     case LOW:
       values["bed2"] = "off";
+      servob2.write(0);
   }
   switch (digitalRead(LIVING)) {
     case HIGH:
       speed += 2;
       values["living"] = "on";
+      servol.write(90);
       break;
     case LOW:
       values["living"] = "off";
+      servol.write(0);
   }
   if (speed > 3) {
     speed = 3;
@@ -95,8 +133,8 @@ void setup() {
   // Serial port for debugging purposes
   Serial.begin(115200);
   initPins();
-  initWiFi();
   initSPIFFS();
+  initWiFi();
 
   // Route for root / web page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
