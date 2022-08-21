@@ -9,7 +9,8 @@
 
 Servo servob1;
 Servo servob2;
-Servo servol;
+Servo servol1;
+Servo servol2;
 
 JSONVar values;
 
@@ -25,7 +26,8 @@ const int SPEED3 = 22;
 const int ZoneValve = 23;
 const int SERVOB1 = 14;
 const int SERVOB2 = 12;
-const int SERVOL = 13 ;
+const int SERVOL1 = 13;
+const int SERVOL2 = 15;
 
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
@@ -87,7 +89,8 @@ void initPins() {
 
   servob1.attach(SERVOB1);
   servob2.attach(SERVOB2);
-  servol.attach(SERVOL);
+  servol1.attach(SERVOL1);
+  servol2.attach(SERVOL2);
 }
 
 int getSpeed() {
@@ -96,7 +99,7 @@ int getSpeed() {
     case HIGH:
       speed += 1;
       values["bed1"] = "on";
-      servob1.write(90);
+      servob1.write(100);
       break;
     case LOW:
       values["bed1"] = "off";
@@ -106,7 +109,7 @@ int getSpeed() {
     case HIGH:
       speed += 1;
       values["bed2"] = "on";
-      servob2.write(90);
+      servob2.write(100);
       break;
     case LOW:
       values["bed2"] = "off";
@@ -116,11 +119,13 @@ int getSpeed() {
     case HIGH:
       speed += 2;
       values["living"] = "on";
-      servol.write(90);
+      servol1.write(100);
+      servol2.write(100);
       break;
     case LOW:
       values["living"] = "off";
-      servol.write(0);
+      servol1.write(0);
+      servol2.write(0);
   }
   if (speed > 3) {
     speed = 3;
