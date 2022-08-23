@@ -139,7 +139,7 @@ void setup() {
   Serial.begin(115200);
   initPins();
   initSPIFFS();
-  initWiFi();
+  //initWiFi();
 
   // Route for root / web page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
