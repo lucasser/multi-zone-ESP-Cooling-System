@@ -10,8 +10,8 @@ const int SERVO2 = 15;
 void initPins() {
   pinMode(SWITCH, INPUT_PULLDOWN);
 
-  servol1.attach(SERVO1);
-  servol2.attach(SERVO2);
+  servo1.attach(SERVO1);
+  servo2.attach(SERVO2);
 }
 
 void setup() {
@@ -24,11 +24,13 @@ void loop() {
   switch (digitalRead(SWITCH)) {
     case HIGH:
       Serial.println("high");
-      servob1.write(100);
+      servo1.write(100);
+      servo2.write(100);
       break;
     case LOW:
       Serial.println("low");
-      servob1.write(0);
+      servo1.write(0);
+      servo2.write(0);
   }
   delay(500);
 }
